@@ -1,1 +1,19 @@
+#Download the data 
+wget http://qwone.com/~jason/20Newsgroups/20news-bydate.tar.gz
+hadoop fs -mkdir -p /opt/20newsdata
+hadoop fs -put 20news-bydate-test/* /opt/20newsdata
 
+#Convert the raw data into a sequence file. The seqdirectory command will generate sequence files from a directory.
+mahout seqdirectory -i /opt/20newsdata -o /opt/20newsdataseq-out
+
+#Convert the sequence file into a sparse vector using the following command
+mahout seq2sparse -i /opt/20newsdataseq-out/part-m-00000 -o /opt/hue/20newsdatavec -lnorm -nv -wt tfidf
+
+#Split the set of vectors to train and test the model:
+mahout split -i /opt/hue/20newsdatavec/tfidf-vectors --trainingOutput /opt/hue/20newsdatatrain --testOutput /opt/hue/20newsdatatest --randomSelectionPct 40 --overwrite --sequenceFiles -xm sequential
+
+#Training the model:
+mahout trainnb -i /opt/hue/20newsdatatrain  -o /opt/hue/model -li /opt/hue/labelindex -ow -c
+
+#Testing the model and generate the result:
+mahout testnb -i /opt/hue/20newsdatatest -m /opt/hue/model/ -l  /opt/hue/labelindex -ow -o /opt/hue/results
