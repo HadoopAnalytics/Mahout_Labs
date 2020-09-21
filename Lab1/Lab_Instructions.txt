@@ -1,1 +1,11 @@
+#Generate Recommendations from Data Sales Data
+--------------------------------------------------
+hadoop fs -mkdir /opt/recommender-in
+hadoop fs -put user-item.txt /opt/recommender-in
+
+mahout recommenditembased -s SIMILARITY_LOGLIKELIHOOD -i /opt/recommender-in -o /opt/recommender-out --numRecommendations 5
+
+Results:
+----------
+hadoop fs -cat /opt/recommender-out/part-r-00000
 
